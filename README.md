@@ -233,16 +233,6 @@ ESG(환경·사회·지배구조) 지속가능경영 보고서를 기반으로,
 ![test_mypage](/image/testcase/test_mypage.png)
 
 
-<div align="center">
-
-**ESG 전략 챗봇** - 지능형 ESG 정보 제공 서비스
-
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/your-username/esg_chatbot)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://hub.docker.com/r/wonwookims/esg-chatbot)
-
-**프로젝트 완료일: 2025년 06월 27dlf**
-
-</div> 
 
 ## 🗣️ 프로젝트 한줄 회고
 
@@ -255,3 +245,11 @@ ESG(환경·사회·지배구조) 지속가능경영 보고서를 기반으로,
 |**박진양**| 3차 프로젝트에 이어 12기 최고의 멤버들과 함께 4차 프로젝트를 무사히 완료할 수 있어서 너무 기쁩니다.
 프로젝트 기획부터, 백엔드와 프론트엔드 설계, 산출물 문서 작업, 웹 서비드 배포 등 팀원들에게 배운게 엄청 많습니다. 항상 감사합니다!! 정말 최고였어요!! 품위와 격이 다른 김이박최!! |
 |**최문영**| 좋은 팀원들과 함께 3차에서 했던 프로젝트를 발전시켜 더 좋은 결과물을 낼 수 있어서 뿌듯했습니다! 팀원 모두가 열정있게 참여하였기 때문에 좋은 결과가 나올 수 있었던 것 같습니다. 여러분 가지 마세요 ~ ㅜ,ㅜ |
+
+<div align="center">
+
+**ESG 전략 챗봇** - 지능형 ESG 정보 제공 서비스
+**프로젝트 완료일: 2025년 06월 27일**
+
+</div> 
+
