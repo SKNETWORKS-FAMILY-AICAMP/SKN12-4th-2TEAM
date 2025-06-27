@@ -15,7 +15,7 @@ ESG(환경·사회·지배구조) 지속가능경영 보고서를 기반으로,
 
 | **김원우** | **이정민** | **이지복** | **박진양** | **최문영** |
 |:----------:|:----------:|:----------:|:----------:|:----------:|
-| <img src="./image/team/wonwoo.webp" width="120px" height = "120px"> | <img src="./image/team/jeongmin.webp" width="120px" height = "120px"> | <img src="./image/team/jibok.webp" width="120px" height = "120px"> | <img src="./image/team/jinyang.jpg" width="120px" height = "120px"> | <img src="./image/team/moonyoung.webp" width="120px" height = "120px"> |
+| <img src="./image/team/wonwoo.webp" > | <img src="./image/team/jeongmin.webp" > | <img src="./image/team/jibok.webp" > | <img src="./image/team/jinyang.jpg"> | <img src="./image/team/moonyoung.webp"> |
 
 
 ## 🛠 기술 스택
