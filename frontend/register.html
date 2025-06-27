@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>ESG Chatbot - 회원가입</title>
+    <link rel="stylesheet" href="/common/styles/reset.css">
+    <link rel="stylesheet" href="/common/styles/theme.css">
+    <style>
+        .center-box {
+            width: 700px;
+            margin: 120px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 50px 30px 40px 30px;
+            text-align: center;
+        }
+        h1 { margin-bottom: 30px; }
+
+        .row {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .code-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-top: 0px;
+            margin-bottom: 0px;
+        }
+
+        .input-code {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #verify-code-btn {
+            white-space: nowrap;
+            margin-top: 0;
+            margin-bottom: 0;
+            height: 41px;
+            font-size: 15px;
+            box-sizing: border-box;
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        .input-code {
+            width: 50%;
+        }
+        .input:disabled{
+            background-color:#ccc ;
+
+        }
+
+        .btn-short {
+            width: 40%;
+            padding: 10px 0;
+        }
+        /* 회원가입 2단 폼 스타일 */
+        .register-form-2col {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+        align-items: flex-start;
+        margin: 40px 0;
+        }
+        .register-col {
+        flex: 1;
+        min-width: 300px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        }
+        .signup-btn {
+        width: 200px;
+        margin: 32px auto 0 auto;
+        background: #6CA368;
+        color: #fff;
+        font-size: 1.3em;
+        font-weight: bold;
+        border-radius: 8px;
+        padding: 16px 0;
+        display: block;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+        }
+        .signup-btn:disabled {
+        background: #ccc;
+        }
+
+        .label {
+            text-align: left;
+            display: block;
+            margin-top: 6px;
+            margin-bottom: 0px;
+            line-height: 1;
+        }
+
+        #send-code-btn {
+            font-size: 15px;
+            padding: 8px 16px;
+            height: 36px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+        #verify-status .info {
+            font-size: 15px !important;
+        }
+        #verify-status {
+            height: 36px;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="center-box">
+        <h1>회원가입</h1>
+        <div id="register-alert"></div>
+        <form id="register-form">
+            <div class="register-form-2col">
+                <div class="register-col">
+                    <label class="label" for="email-input">이메일 <span style="color:#D57878;">*</span></label>
+                    <input type="email" class="input" id="email-input" placeholder="이메일을 입력하세요." required>
+                    <button type="button" id="send-code-btn">인증번호 전송</button>
+    
+                    <label class="label" for="reg-name">이름 <span style="color:#D57878;">*</span></label>
+                    <input type="text" class="input" id="reg-name" placeholder="이름을 입력하세요." required disabled>
+    
+                    <label class="label" for="reg-password">비밀번호 <span style="color:#D57878;">*</span></label>
+                    <input type="password" class="input" id="reg-password" placeholder="비밀번호를 입력하세요." required disabled>
+                    <div id="password-rule" style="font-size: 14px; text-align: left; color: #e74c3c;"></div>
+    
+                </div>
+                <div class="register-col">
+                
+                    <label class="label" for="code-input">이메일 인증 <span style="color:#D57878;">*</span></label>
+                    <div class="code-row">
+                    <input type="text" class="input input-code" id="code-input" placeholder="인증번호를 입력하세요." maxlength="6" required disabled>
+                    <button type="button" id="verify-code-btn" disabled>인증번호 확인</button>
+                    </div>
+                    <div id="verify-status" style="min-height:28px; margin-top:0; margin-bottom:0;">&nbsp;&nbsp;</div>
+    
+                    <label class="label" for="reg-company">회사명 <span style="color:#D57878;">*</span></label>
+                    <input type="text" class="input" id="reg-company" placeholder="재직 중인 회사명을 입력하세요." required disabled>
+    
+                    <label class="label" for="reg-password2">비밀번호 확인 <span style="color:#D57878;">*</span></label>
+                    <input type="password" class="input" id="reg-password2" placeholder="비밀번호를 다시 입력하세요." required disabled>
+                    <div id="password-match-msg"></div>
+                </div>
+            </div>
+            <button type="submit" id="register-btn" class="signup-btn" disabled>회원가입</button>
+        </form>
+        
+
+        <button class="link-btn" onclick="location.href='login.html'">로그인으로</button>
+    </div>
+    <script src="/common/utils/validation.js"></script>
+    <script>
+    // API 기본 URL (상대 경로 사용 - Nginx 프록시를 통해 API 서버로 전달)
+    const API_BASE = '';
+    // 인증 완료된 이메일 저장 변수
+    let verifiedEmail = '';
+
+    // 인증번호 전송 버튼 클릭 이벤트
+    document.getElementById('send-code-btn').onclick = async function() {
+        const email = document.getElementById('email-input').value;
+        const alertDiv = document.getElementById('register-alert');
+        
+        // 입력값 검증
+        if (!email) {
+            alertDiv.innerHTML = '<div class="alert">⚠️ 이메일을 입력해주세요.</div>';
+            return;
+        }
+        
+        // 이메일 형식 검증 (정규식 사용)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alertDiv.innerHTML = '<div class="alert">⚠️ 유효한 이메일 주소를 입력해주세요.</div>';
+            return;
+        }
+        
+        alertDiv.innerHTML = '';
+        document.getElementById('send-code-btn').disabled = true;
+        
+        try {
+            // POST /email/send-code - 이메일 인증번호 전송 API 호출
+            const res = await fetch(`${API_BASE}/email/send-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                // 인증번호 전송 성공 시 UI 업데이트
+                document.getElementById('verify-status').innerHTML = '<div class="info" style="font-size:15px;">✉️ 인증번호가 이메일로 전송되었습니다.</div>';
+                document.getElementById('code-input').disabled = false;
+                document.getElementById('verify-code-btn').disabled = false;
+            } else {
+                // 전송 실패 시 에러 메시지 표시
+                let msg = data.detail;
+                if (msg && typeof msg === 'object') {
+                    msg = msg.message || JSON.stringify(msg);
+                }
+                alertDiv.innerHTML = `<div class="alert">⚠️ ${msg || '인증번호 전송 실패'}</div>`;
+                document.getElementById('send-code-btn').disabled = false;
+            }
+        } catch (err) {
+            // 네트워크 에러 등 예외 처리
+            alertDiv.innerHTML = `<div class="alert">⚠️ 에러: ${err}</div>`;
+            document.getElementById('send-code-btn').disabled = false;
+        }
+    };
+
+    // 인증번호 확인 버튼 클릭 이벤트
+    document.getElementById('verify-code-btn').onclick = async function() {
+        const email = document.getElementById('email-input').value;
+        const code = document.getElementById('code-input').value;
+        const alertDiv = document.getElementById('register-alert');
+        
+        // 입력값 검증
+        if (!email || !code) {
+            alertDiv.innerHTML = '<div class="alert">⚠️ 이메일과 인증번호를 모두 입력해주세요.</div>';
+            return;
+        }
+        
+        alertDiv.innerHTML = '';
+        
+        try {
+            // POST /email/verify-code - 이메일 인증번호 확인 API 호출
+            const res = await fetch(`${API_BASE}/email/verify-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, code })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                // 인증 성공 시 UI 활성화 및 상태 업데이트
+                document.getElementById('verify-status').innerHTML = '<div class="success">✅ 인증되었습니다!</div>';
+                verifiedEmail = email;  // 인증된 이메일 저장
+                
+                // 회원가입 폼 필드들 활성화
+                document.getElementById('reg-name').disabled = false;
+                document.getElementById('reg-company').disabled = false;
+                document.getElementById('reg-password').disabled = false;
+                document.getElementById('reg-password2').disabled = false;
+                document.getElementById('register-btn').disabled = false;
+                
+                // 이메일 인증 관련 필드들 비활성화
+                document.getElementById('email-input').disabled = true;
+                document.getElementById('send-code-btn').disabled = true;
+                document.getElementById('code-input').disabled = true;
+                document.getElementById('verify-code-btn').disabled = true;
+            } else {
+                // 인증 실패 시 에러 메시지 표시
+                let msg = data.detail;
+                if (msg && typeof msg === 'object') {
+                    msg = msg.message || JSON.stringify(msg);
+                }
+                alertDiv.innerHTML = `<div class="alert">⚠️ ${msg || '인증 실패'}</div>`;
+            }
+        } catch (err) {
+            // 네트워크 에러 등 예외 처리
+            alertDiv.innerHTML = `<div class="alert">⚠️ 에러: ${err}</div>`;
+        }
+    };
+
+    // 비밀번호 조건 및 일치 여부 실시간 체크
+    const pwInput = document.getElementById('reg-password');
+    const pw2Input = document.getElementById('reg-password2');
+    const pwMsg = document.getElementById('password-match-msg');
+    
+    // 비밀번호 유효성 및 일치 여부 실시간 업데이트 함수
+    function updatePwMsg() {
+        const pw = pwInput.value;
+        const pw2 = pw2Input.value;
+        
+        // 비밀번호 조건 안내 (8자 이상, 영문/숫자/특수문자 중 2가지 이상)
+        if (!pw) {
+            document.getElementById('password-rule').textContent = '';
+        } else if (!checkPasswordRule(pw)) {
+            document.getElementById('password-rule').textContent = '비밀번호는 8자 이상이며 영문, 숫자, 특수문자 중 2가지 이상을 포함해야 합니다.';
+        } else {
+            document.getElementById('password-rule').textContent = '';
+        }
+        
+        // 비밀번호 일치 여부 안내
+        if (!pw2) {
+            pwMsg.textContent = '';
+            pwMsg.style.color = '';
+        } else if (pw === pw2) {
+            pwMsg.textContent = '입력한 비밀번호와 일치합니다.';
+            pwMsg.style.color = '#27ae60';
+        } else {
+            pwMsg.textContent = '비밀번호가 일치하지 않습니다.';
+            pwMsg.style.color = '#e74c3c';
+        }
+    }
+    
+    // 비밀번호 입력 필드에 실시간 이벤트 리스너 추가
+    pwInput.addEventListener('input', updatePwMsg);
+    pw2Input.addEventListener('input', updatePwMsg);
+
+    // 회원가입 폼 제출 이벤트 핸들러
+    document.getElementById('register-form').onsubmit = async function(e) {
+        e.preventDefault();
+        
+        // 이메일 인증 완료 여부 확인
+        if (!verifiedEmail) {
+            document.getElementById('register-alert').innerHTML = '<div class="alert">이메일 인증을 완료해주세요.</div>';
+            return;
+        }
+        
+        // 폼 데이터 추출
+        const name = document.getElementById('reg-name').value;
+        const company = document.getElementById('reg-company').value;
+        const password = document.getElementById('reg-password').value;
+        const password2 = document.getElementById('reg-password2').value;
+        const alertDiv = document.getElementById('register-alert');
+        alertDiv.innerHTML = '';
+        
+        // 비밀번호 유효성 검사
+        if (!checkPasswordRule(password)) {
+            alertDiv.innerHTML = '<div class="alert">⚠️ 비밀번호는 8자 이상이며 영문, 숫자, 특수문자 중 2가지 이상을 포함해야 합니다.</div>';
+            return;
+        }
+        
+        // 비밀번호 일치 확인
+        if (password !== password2) {
+            alertDiv.innerHTML = '<div class="alert">⚠️ 비밀번호가 일치하지 않습니다.</div>';
+            return;
+        }
+        
+        try {
+            // POST /email/register-after-verification - 회원가입 완료 API 호출
+            const res = await fetch(`${API_BASE}/email/register-after-verification`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    email: verifiedEmail,
+                    password: password,
+                    name: name,
+                    company: company
+                })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                // 회원가입 성공 시 처리
+                alertDiv.innerHTML = '<div class="success">✅ 회원가입이 완료되었습니다!</div>';
+                setTimeout(() => {
+                    location.href = 'login.html';  // 2초 후 로그인 페이지로 이동
+                }, 2000);
+            } else {
+                // 회원가입 실패 시 에러 메시지 표시
+                let msg = data.detail;
+                if (msg && typeof msg === 'object') {
+                    msg = msg.message || JSON.stringify(msg);
+                }
+                alertDiv.innerHTML = `<div class="alert">⚠️ ${msg || '회원가입 실패'}</div>`;
+            }
+        } catch (err) {
+            // 네트워크 에러 등 예외 처리
+            alertDiv.innerHTML = `<div class="alert">⚠️ 에러: ${err}</div>`;
+        }
+    };
+    </script>
+</body>
+</html> 

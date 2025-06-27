@@ -1,0 +1,80 @@
+/* theme.css: 버튼, input, alert, 공통 레이아웃 등 */
+
+/* 버튼 */
+button {
+    background: #6CA368;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.2s;
+    border-radius: 6px;
+    padding: 10px;
+}
+button:hover { background: #46733F; }
+
+button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* input 박스*/
+.input {
+    border-radius: 6px;
+    border: 1px solid #BCBCBC;
+    background-color:#E1E8E0 ;
+    font-size: 1em;
+    padding: 10px;
+}
+.input::placeholder {
+    color:#929292;
+}
+
+/*성공 안내 메시지 창*/
+.success { 
+    display: inline-block;
+    color: #fff;
+    background: #81c147; 
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    padding: 10px 24px;              
+
+}
+
+/*실패 등 오류 메시지 창*/
+.alert {
+    display: inline-block;
+    color: #000;
+    background: #f6ce3d95;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    padding: 10px 24px;              
+
+}
+
+/*인증번호 전송 창*/
+.info { 
+    color: #fff;
+    background: #6CA368;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;}
+
+
+/*링크 이동 버튼*/
+.link-btn {
+    background: none;
+    color: #46733F;
+    border: none;
+    margin-top: 18px;
+    text-decoration: underline;
+    cursor: pointer;
+    font-size: 0.98em;
+}
+.link-btn:hover{
+    color: #fff;
+}
+
+

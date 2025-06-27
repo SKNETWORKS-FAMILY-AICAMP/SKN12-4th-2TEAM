@@ -1,0 +1,16 @@
+fastapi
+uvicorn
+sqlalchemy
+psycopg2-binary
+python-dotenv
+openai
+chromadb
+langchain
+langchain-community
+sentence-transformers
+fastapi-mail
+bcrypt
+jwt
+python-jose
+python-multipart
+python-dotenv

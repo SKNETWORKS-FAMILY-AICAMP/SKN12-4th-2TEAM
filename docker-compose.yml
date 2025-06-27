@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14
+    container_name: esg-postgres
+    environment:
+      POSTGRES_USER: esgadmin
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: esg_chatbot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+
+  api:
+    build: .
+    env_file:
+      - .env
+    container_name: esg-api
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://esgadmin:mysecretpassword@db:5432/esg_chatbot
+      HF_HUB_DOWNLOAD_TIMEOUT: 60
+    ports:
+      - "8000:8000"
+    command: ["/wait-for-it.sh", "db:5432", "--", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+volumes:
+  postgres_data:

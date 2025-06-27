@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14
+    container_name: esg-postgres-prod
+    environment:
+      POSTGRES_USER: esgadmin
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: esg_chatbot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  api:
+    image: wonwookims/esg-chatbot:latest
+    container_name: esg-api-prod
+    env_file:
+      - .env
+    depends_on:
+      - db
+    environment:
+      DATABASE_URL: postgresql://esgadmin:mysecretpassword@db:5432/esg_chatbot
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+  frontend:
+    image: wonwookims/esg-chatbot-frontend:latest
+    container_name: esg-frontend-prod
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  postgres_data: 

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>ESG AI 챗봇</title>
+    <link rel="stylesheet" href="/common/styles/reset.css">
+    <link rel="stylesheet" href="/common/styles/theme.css">
+    <link rel="stylesheet" href="/common/components/navbar.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Pretendard', sans-serif;
+            background-color: white;
+        }
+        .main-banner {
+            background-color: #e7f5eb;
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .main-banner h1 {
+            font-size: 40px;
+            font-weight: bold;
+        }
+        .main-banner span {
+            color: #1eaa59;
+        }
+        .main-banner p {
+            font-size: 17px;
+            margin-top: 10px;
+        }
+        .main-banner button {
+            margin-top: 25px;
+            background-color: #1eaa59;
+            color: white;
+            font-size: 15px;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .start-btn .btn-icon {
+            height: 25px;
+            vertical-align: middle;
+            margin-right: 10px;
+            margin-top: -3px;
+            display: inline-block;
+        }
+        .features {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .features h2 {
+            font-size: 30px;
+            color: #1eaa59;
+            margin-bottom: 40px;
+        }
+        .feature-boxes {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        .feature {
+            background-color: #F4F9F3;
+            padding: 25px;
+            width: 330px;
+            height: 250px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(30, 170, 89, 0.18);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .feature-icon {
+            height: 44px;
+            margin-bottom: 18px;
+            margin-top: 2px;
+            display: block;
+        }
+        .feature-title {
+            font-size: 1.18em;
+            font-weight: bold;
+            margin-bottom: 12px;
+            margin-top: 0;
+            text-align: center;
+        }
+        .feature-desc {
+            font-size: 1em;
+            margin: 0;
+            text-align: center;
+            color: #222;
+            line-height: 1.6;
+        }
+        .data-section {
+            text-align: center;
+            padding: 80px 20px;
+        }
+        .data-section h2 {
+            font-size: 30px;
+            color: #1eaa59;
+            margin-bottom: 40px;
+        }
+        .data-cards {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 40px;
+        }
+        .data-card {
+            background-color: #F4F9F3;
+            padding: 20px;
+            width: 330px;
+            height: 250px;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        .data-icon {
+            height: 38px;
+            margin-bottom: 14px;
+            margin-top: 2px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .data-title {
+            font-size: 1.08em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            margin-top: 25px;
+            text-align: center;
+        }
+        .data-desc {
+            font-size: 0.98em;
+            margin: 0;
+            text-align: center;
+            color: #222;
+            line-height: 1.6;
+        }
+        .logos {
+            margin-top: 40px;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+        .logos img {
+            height: 30px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+    <div id="navbar"></div>
+    <section class="main-banner">
+        <h1>지속가능한 미래, <span>ESG 챗봇</span>이 함께합니다.</h1>
+        <p>ESG 경영이 막막할 때, 우수 기업의 전략을 학습한 AI 챗봇이<br>
+        우리 조직만의 방향을 제안하고 실천까지 연결해드립니다.</p>
+        <button class="start-btn" onclick="location.href='chatbot.html'">
+            <img src="/common/images/chatbot.png" alt="" class="btn-icon">
+            챗봇 시작하기
+        </button>
+    </section>
+    <section class="features">
+        <h2>ESG AI만의 특화 기능</h2>
+        <div class="feature-boxes">
+            <div class="feature">
+                <img src="/common/images/feature1.png" alt="" class="feature-icon">
+                <h3 class="feature-title">맞춤형 ESG 전략 비교 분석</h3>
+                <p class="feature-desc">우수 ESG 기업의 전략 데이터를 기반으로<br>가장 유사한 우수 사례와 비교해드립니다.</p>
+            </div>
+            <div class="feature">
+                <img src="/common/images/feature2.png" alt="" class="feature-icon">
+                <h3 class="feature-title">데이터 기반 ESG 전략 제안</h3>
+                <p class="feature-desc">당신의 ESG 방향성을 이해하고<br>실현 가능한 전략을 AI가 제안합니다.</p>
+            </div>
+            <div class="feature">
+                <img src="/common/images/feature3.png" alt="" class="feature-icon">
+                <h3 class="feature-title">실시간 대화형 피드백 시스템</h3>
+                <p class="feature-desc">ESG 담당자가 AI와 회의하듯 실시간으로<br>소통할 수 있는 대화형 기능을 제공합니다.</p>
+            </div>
+        </div>
+    </section>
+    <section class="data-section">
+        <h2>학습에 사용한 데이터</h2>
+        <div class="data-cards">
+            <div class="data-card">
+                <img src="/common/images/data1.png" alt="" class="data-icon">
+                <h4 class="data-title">한국 ESG 기준원 ESG 모델 규준</h4>
+                <p class="data-desc">챗봇은 'ESG 표준 규준'을 학습하여<br>보다 정확하고 실현력 있는 답변을 할 수 있도록 구성되었습니다.</p>
+            </div>
+            <div class="data-card">
+                <img src="/common/images/data2.png" alt="" class="data-icon">
+                <h4 class="data-title">한국 ESG 기준원 ESG 우수 기업</h4>
+                <p class="data-desc">RAG 학습에는 ESG 우수 기업 4곳의<br>지속가능경영보고서가 포함되었습니다.</p>
+            </div>
+        </div>
+        <div class="logos">
+            <img src="/common/images/CJ_logo.png" alt="CJ">
+            <img src="/common/images/Sampyo_logo.png" alt="Sampyo">
+            <img src="/common/images/KTNG_logo.png" alt="KT&G">
+            <img src="/common/images/Shinhan_logo.png" alt="신한라이프">
+        </div>
+    </section>
+    <script src="/common/components/navbar.js"></script>
+</body>
+</html> 

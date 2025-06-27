@@ -1,0 +1,669 @@
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+    <meta charset="UTF-8">
+    <title>ESG Chatbot - 챗봇</title>
+    <link rel="stylesheet" href="/common/styles/reset.css">
+    <link rel="stylesheet" href="/common/styles/theme.css">
+    <link rel="stylesheet" href="/common/components/navbar.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+        margin: 0;
+        background: #f7f7f7;
+        height: 100vh;
+        overflow: hidden;
+        }
+        #navbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 200;
+        height: 100px;
+        }
+        .main-layout {
+        display: flex;
+        width: 100%;
+        margin-top: 100px;
+        box-sizing: border-box;
+        }
+        .side-panel {
+        width: 320px;
+        min-width: 320px;
+        background: #f8f9fa;
+        border-right: 1.5px solid #eee;
+        padding: 12px 18px 80px 24px;
+        height: calc(100vh - 60px);
+        }
+        .main-layout.collapsed .side-panel {
+        width: 0;
+        min-width: 0;
+        opacity: 0;
+        pointer-events: none;
+        padding: 0;
+        border: none;
+        }
+        .side-panel-content {
+        height: 100%;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+        }
+        .guide-box {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.04);
+        padding: 18px 16px;
+        margin-bottom: 12px;
+        font-size: 1em;
+        color: #444;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        margin-left: 8px;
+        margin-right: 8px;
+        }
+        .guide-box:last-child { margin-bottom: 0; }
+        .guide-box .icon {
+        font-size: 1.3em;
+        margin-top: 2px;
+        color: #bbb;
+        }
+        .example-title {
+        font-weight: bold;
+        color: #000;
+        font-size: 1.08em;
+        }
+        
+        .keyword-box {
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-size: 0.98em;
+        margin-bottom: 10px;
+        display: inline-block;
+        }
+
+        .keyword-box-env {
+        color: #678360;
+        }
+
+        .keyword-box-sc {
+        color: #718999;
+        }
+
+        .keyword-box-gv {
+        color: #9D746D;
+        }
+
+
+        .example-category {
+        font-weight: bold;
+        margin-bottom: 10px;
+        }
+
+        .example-q {
+        border-radius: 8px;
+        padding: 10px 14px;
+        margin-bottom: 8px;
+        font-size: 0.98em;
+        color: #222;
+        cursor: pointer;
+        transition: background 0.15s;
+        }
+
+        .example-env-q {
+            background: #DBEBD7;
+        }
+
+        .example-sc-q {
+            background: #DBE8F2;
+        }
+
+        .example-gv-q {
+            background: #CDACAC;
+        }
+        
+        .example-env-q:hover {
+            color:#fff;
+            background: #94BA8A;
+        }
+
+        .example-sc-q:hover {
+            color:#fff;
+            background: #95B1C4;
+        }
+
+        .example-gv-q:hover {
+            color:#fff;
+            background: #A98686;
+        }
+    
+        .chatbot-main {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        height: calc(100vh - 60px);
+        position: relative;
+        align-items: center;
+        }
+        .chatbot-header,
+        .chat-area,
+        .chatbot-input-bar {
+        width: 100%;
+        margin: 0 auto;
+        }
+        .chatbot-header {
+        display: flex;
+        align-items: center;
+        padding: 32px 32px 0 32px;
+        font-weight: bold;
+        gap: 12px;
+        }
+        .toggle-arrow {
+        font-size: 1.5em;
+        cursor: pointer;
+        direction: ltr;
+        transform: none !important;
+        transition: none !important;
+        }
+
+        .main-layout.collapsed .toggle-arrow {
+        transform: rotate(180deg);
+        }
+        .chatbot-header .refresh-btn {
+        margin-left: auto;
+        font-size: 1.2em;
+        color: #444;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: color 0.15s;
+        padding: 0;
+        }
+        .chatbot-header .refresh-btn:hover {
+        color: #46733F;
+        }
+        .chat-area {
+        height: calc(100vh - 60px - 70px);
+        overflow-y: auto;
+        padding: 84px 32px 80px 32px;
+        }
+        .chat-bubble.user, .chat-bubble.bot {
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .chat-bubble.user {
+        display: flex;
+        justify-content: flex-end;
+        text-align: right;
+        margin-bottom: 24px;
+        }
+        .chat-bubble.user .bubble {
+        display: inline-block;
+        background: #666;
+        color: #fff;
+        border-radius: 18px 18px 4px 18px;
+        padding: 12px 20px;
+        font-size: 1.1em;
+        max-width: 70%;
+        }
+        .chat-bubble.bot {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin-bottom: 32px;
+        }
+        .chat-bubble.bot .bot-icon {
+        font-size: 2em;
+        margin-top: 2px;
+        }
+        .chat-bubble.bot .bubble {
+        background: transparent;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+        font-size: 1.08em;
+        color: #222;
+        text-align: left;
+        }
+        .chat-bubble.bot .bubble hr {
+        margin: 18px 0;
+        border: none;
+        border-top: 1px solid #ddd;
+        }
+        .chat-bubble.bot .bubble b {
+        font-weight: bold;
+        }
+        .chat-feedback {
+        margin: 12px 0 0 0;
+        font-size: 0.98em;
+        color: #888;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        }
+        .chat-feedback .feedback-btn {
+        background: none;
+        border: none;
+        color: #52B33F;
+        cursor: pointer;
+        font-size: 1.1em;
+        margin-left: 4px;
+        }
+        .chat-feedback .error-msg {
+        margin-left:16px; color:#e74c3c;
+        }
+        .chatbot-input-bar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 40px;
+        width: 100%;
+        max-width: 700px;
+        margin: 0 auto;
+        border-top: none;
+        padding: 16px 0 20px 0;
+        z-index: 100;
+        background: transparent;
+        }
+        .chatbot-input-inner {
+        width: 100%;
+        max-width: 1300px;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        }
+        .chatbot-input-inner input {
+        flex: 1;
+        font-size: 1.1em;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px 18px;
+        }
+        .chatbot-input-inner button {
+        background: #6CA368;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        width: 50px;
+        height: 50px;
+        cursor: pointer;
+        transition: background 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }
+        .chatbot-input-inner button svg {
+            width: 24px;
+            height: 24px;
+        }
+        .chatbot-input-inner button:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        }
+        #spinner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 199;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #6CA368;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .chat-time {
+            font-size: 0.8em;
+            color: #999;
+            margin: 0 4px;
+        }
+        .bubble-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            max-width: 80%;
+        }
+        .main-layout.collapsed .side-panel .toggle-arrow#toggle-sidebar-left {
+            display: none !important;
+        }
+        .main-layout.collapsed .chatbot-header .toggle-arrow#toggle-sidebar-right {
+            display: inline-block !important;
+            margin-right: 12px;
+        }
+        .chatbot-header .toggle-arrow#toggle-sidebar-right {
+            display: none;
+        }
+        /* 챗봇 리스트 들여쓰기 */
+        .bubble ul, .bubble ol {
+          margin-left: 1.5em;
+          padding-left: 1.2em;
+          margin-top: 0;
+        }
+        .bubble h3 {
+          margin-bottom: 0;
+        }
+    </style>
+    </head>
+    <body>
+    <div id="navbar"></div>
+    <div class="main-layout">
+        <div class="side-panel">
+            <div style="display: flex; justify-content: flex-end; align-items: center;">
+              <span class="toggle-arrow" id="toggle-sidebar-left" style="display: block;">◀</span>
+            </div>
+            <div class="side-panel-content">
+                <h2>가이드라인</h2>
+                <div>
+                <div class="guide-box"><div style="display:flex;align-items:center;gap:8px;"><span class="icon">⚠️</span><span class="example-title">시스템 오류 대응</span></div><div style="font-size:0.97em;color:#888;margin-top:4px;">챗봇이 인식적으로 응답하지 않을 경우, F5 키를 눌러 페이지를 새로고침하세요.</div></div>
+                <div class="guide-box"><div style="display:flex;align-items:center;gap:8px;"><span class="icon">💡</span><span class="example-title">전문성 있는 답변</span></div><div style="font-size:0.97em;color:#888;margin-top:4px;">기업의 ESG 경영 전략을 구체적이고 명확하게 입력해 주세요.<br>AI 챗봇의 우수 기업 사례를 기반으로 전략의 적합성과 개선방안을 제시합니다.</div></div>
+                <div class="guide-box"><div style="display:flex;align-items:center;gap:8px;"><span class="icon">🔄</span><span class="example-title">챗봇 운영 방식</span></div><div style="font-size:0.97em;color:#888;margin-top:4px;">챗봇과의 대화는 세션 단위로 유지됩니다.<br>새로운 질문을 입력하신 후, 우측 상단의 초기화 버튼을 눌러 리셋하세요.</div></div>
+                <div class="guide-box"><div style="display:flex;align-items:center;gap:8px;"><span class="icon">💬</span><span class="example-title">대화 내역 저장</span></div><div style="font-size:0.97em;color:#888;margin-top:4px;">챗봇과의 모든 대화 내용은 자동으로 저장됩니다.<br>저장된 내역은 마이페이지 내 히스토리 메뉴에서 확인할 수 있으며, 추후 재참조 및 업무 보고 시 활용할 수 있습니다.</div></div> 
+                <div class="guide-box"><div style="display:flex;align-items:center;gap:8px;"><span class="icon">📂</span><span class="example-title">카테고리 및 예시 질문 안내</span></div><div style="font-size:0.97em; color:#888;margin-top:4px;">주요 질문 카테고리와 예시 문항은 사이드바 하단에서 확인할 수 있습니다.<br>각 예시 질문을 클릭하면 해당 문장이 자동으로 입력되어 즉시 검색됩니다.</div></div>
+                </div>
+                <hr style="width: 60%; margin: 20px auto; border: none; border-top: 1px solid #DADADA;">
+                <h2>예시질문</h2>
+                <div class="example-list">
+                <div class="example-category">🌍 환경(Environment)</div>
+                <div class="keyword-box keyword-box-env"><strong>탄소배출, 재생에너지, 친환경 포장, 에너지 절약</strong></div>
+                    <div class="example-q example-env-q" data-question="당사는 사옥 전력의 30%를 태양광으로 전환했는데, 이런 점이 ESG 우수 전략으로 인정되나요?">당사는 사옥 전력의 30%를 태양광으로 전환했는데, 이런 점이 ESG 우수 전략으로 인정되나요?</div>
+                    <div class="example-q example-env-q" data-question="최근 제품 포장에 사용되는 재활용 플라스틱 비율을 70%까지 확대하였는데, 경쟁사들의 도입 수준은 어떤가요?">최근 제품 포장에 사용되는 재활용 플라스틱 비율을 70%까지 확대하였는데, 경쟁사들의 도입 수준은 어떤가요?</div>
+                </div>
+                <div class="example-list">
+                <div class="example-category">👥 사회(Social)</div>
+                <div class="keyword-box keyword-box-sc"><strong>일회용품 저감, 지역사회 참여, 직원 복지, 다양성</strong></div>
+                    <div class="example-q example-sc-q" data-question="올해 여성 임원 비율이 20% 감소했는데, 이 점이 다양성과 관련해 부정적 평가를 받을 수 있나요?">올해 여성 임원 비율이 20% 감소했는데, 이 점이 다양성과 관련해 부정적 평가를 받을 수 있나요?</div>
+                    <div class="example-q example-sc-q" data-question="협력사 대상 ESG 평가를 연 1회 실시하고 결과를 공개하는데, 이런 방식이 보편적인가요?">협력사 대상 ESG 평가를 연 1회 실시하고 결과를 공개하는데, 이런 방식이 보편적인가요?</div>
+                </div>
+                <div class="example-list">
+                <div class="example-category">🗂️ 지배구조(Governance)</div>
+                <div class="keyword-box keyword-box-gv"><strong>인사 구조, 윤리 경영, 내부감사, 이사회 구성</strong></div>
+                    <div class="example-q example-gv-q" data-question="사내 윤리강령을 전 구성원에게 교육하고 서약을 받도록 운영 중인데, 효과적인가요?">사내 윤리강령을 전 구성원에게 교육하고 서약을 받도록 운영 중인데, 효과적인가요?</div>
+                    <div class="example-q example-gv-q" data-question="내부 고발 제도가 마련되어 있지만 익명성이 부족하다는 지적을 받았는데, 개선해야 할까요?">내부 고발 제도가 마련되어 있지만 익명성이 부족하다는 지적을 받았는데, 개선해야 할까요?</div>
+                </div>
+            </div>
+        </div>
+        <div class="chatbot-main">
+            <div id="spinner-overlay" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+            <div class="chatbot-header">
+                <span class="toggle-arrow" id="toggle-sidebar-right" style="display: none; font-size:1.5em;">▶</span>
+                <span style="font-size:1.5em; font-weight: bold;">ESG 챗봇</span>
+                <a href="/chatbot.html" class="refresh-btn" title="새 채팅 시작"><span style="font-size:1.5em;">&#8635;</span></a>
+            </div>
+            <div class="chat-area" id="chat-area">
+                <!-- 채팅 내용이 여기에 동적으로 추가됩니다 -->
+            </div>
+            <div class="chatbot-input-bar">
+                <div class="chatbot-input-inner">
+                <input type="text" placeholder="ESG 전략을 입력하세요...">
+                <button title="전송">
+                    <svg viewBox="0 0 24 24" fill="currentColor" height="1em" width="1em">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/common/components/navbar.js"></script>
+    <script>
+    // API 기본 URL (상대 경로 사용 - Nginx 프록시를 통해 API 서버로 전달)
+    const API_BASE = '';
+
+    // URL에서 채팅방 ID 추출 함수
+    function getRoomIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('room');
+    }
+
+    // 현재 채팅방 ID (URL 파라미터에서 가져옴)
+    let roomId = getRoomIdFromUrl();
+
+    // 페이지 로드 완료 시 실행되는 초기화 함수
+    window.addEventListener('DOMContentLoaded', async function() {
+        // 사용자 인증 상태 확인
+        // credentials: 'include'로 쿠키 기반 인증 사용
+        fetch(`${API_BASE}/auth/me`, { credentials: 'include' })
+            .then(res => {
+                if (!res.ok) location.href = `login.html?next=${encodeURIComponent(location.pathname + location.search)}`;
+            })
+            .catch(() => location.href = `login.html?next=${encodeURIComponent(location.pathname + location.search)}`);
+
+        // 사이드바 토글 버튼 이벤트 설정
+        document.getElementById('toggle-sidebar-left').onclick = function() {
+            document.querySelector('.main-layout').classList.add('collapsed');
+        };
+        document.getElementById('toggle-sidebar-right').onclick = function() {
+            document.querySelector('.main-layout').classList.remove('collapsed');
+        };
+
+        // 기존 채팅방이 있는 경우: 메시지 이력 불러오기
+        if (roomId) {
+            // GET /chatroom/{roomId}/messages - 채팅방 메시지 히스토리 조회 API 호출
+            const res = await fetch(`${API_BASE}/chatroom/${roomId}/messages`, { credentials: 'include' });
+            if (res.ok) {
+                const history = await res.json();
+                // 각 메시지를 채팅 버블로 표시
+                history.forEach(item => {
+                    addChatBubble('user', item.question);
+                    addChatBubble('bot', marked.parse(item.response), item.id, item.feedback_given);
+                });
+            }
+        }
+
+        // 메시지 입력창 이벤트 설정
+        const input = document.querySelector('.chatbot-input-inner input');
+        const sendBtn = document.querySelector('.chatbot-input-inner button');
+        
+        // Enter 키로 메시지 전송
+        input.onkeyup = function(e) {
+            if (e.key === 'Enter') sendMessage();
+        };
+        
+        // 전송 버튼 클릭으로 메시지 전송
+        sendBtn.onclick = sendMessage;
+
+        // 예시 질문 클릭 이벤트 설정
+        document.querySelectorAll('.example-q').forEach(el => {
+            el.onclick = () => {
+                input.value = el.dataset.question;
+                sendMessage();
+            };
+        });
+    });
+
+    // 메시지 전송 함수 (채팅방 생성 + 메시지 전송)
+    async function sendMessage() {
+        const input = document.querySelector('.chatbot-input-inner input');
+        const sendBtn = document.querySelector('.chatbot-input-inner button');
+        const message = input.value.trim();
+        
+        // 빈 메시지 체크
+        if (!message) return;
+
+        // 사용자 메시지를 채팅 영역에 즉시 표시
+        addChatBubble('user', message);
+        input.value = '';
+        input.disabled = true;
+        sendBtn.disabled = true;
+
+        // 로딩 스피너 표시
+        const spinner = document.getElementById('spinner-overlay');
+        spinner.style.display = 'flex';
+
+        try {
+            // 1단계: 채팅방이 없으면 먼저 생성 (title=첫 메시지)
+            if (!roomId) {
+                // POST /chatroom/ - 새로운 채팅방 생성 API 호출
+                const resRoom = await fetch(`${API_BASE}/chatroom/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: message }),
+                    credentials: 'include'
+                });
+                if (!resRoom.ok) throw new Error('채팅방 생성 실패');
+                const dataRoom = await resRoom.json();
+                roomId = dataRoom.id;
+                
+                // 2단계: URL에 room 파라미터 추가 (pushState로 새로고침 없이)
+                window.history.replaceState({}, '', `?room=${roomId}`);
+            }
+            
+            // 3단계: 채팅방 생성 후 메시지 전송
+            // POST /chat/chat - 챗봇과 대화 API 호출
+            const res = await fetch(`${API_BASE}/chat/chat`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: message, chatroom_id: roomId }),
+                credentials: 'include'
+            });
+            if (!res.ok) throw new Error('메시지 전송 실패');
+            const data = await res.json();
+            
+            // 챗봇 응답을 채팅 영역에 표시
+            addChatBubble('bot', marked.parse(data.response), data.id, false);
+        } catch (err) {
+            // 에러 발생 시 에러 메시지 표시
+            addChatBubble('bot', `⚠️ 답변을 불러오지 못했습니다. ${err}`);
+        } finally {
+            // 로딩 완료 후 UI 상태 복원
+            spinner.style.display = 'none';
+            input.disabled = false;
+            sendBtn.disabled = false;
+            input.focus();
+        }
+    }
+
+    // 채팅 버블 생성 및 추가 함수
+    function addChatBubble(who, text, chatId = null, feedbackGiven = false) {
+        const chatArea = document.getElementById('chat-area');
+        const bubbleContainer = document.createElement('div');
+        bubbleContainer.className = `chat-bubble ${who}`;
+
+        // 현재 시간 표시
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        const timeEl = document.createElement('span');
+        timeEl.className = 'chat-time';
+        timeEl.textContent = time;
+
+        const bubbleDiv = document.createElement('div');
+        bubbleDiv.className = 'bubble';
+
+        // 줄바꿈 변환 추가 (챗봇 응답의 경우)
+        let htmlText = text;
+        if (who === 'bot') {
+            htmlText = htmlText.replace(/\n/g, '<br>');
+        }
+        bubbleDiv.innerHTML = htmlText;
+
+        if (who === 'bot') {
+            // 챗봇 응답 버블 (피드백 기능 포함)
+            const bubbleWrapper = document.createElement('div');
+            bubbleWrapper.className = 'bubble-wrapper';
+
+            const bubbleContent = document.createElement('div');
+            bubbleContent.appendChild(bubbleDiv);
+            bubbleContent.style.paddingTop = '16px'; // 챗봇 답장 상단 패딩 추가
+            bubbleContent.style.paddingLeft = '16px'; // 챗봇 답장 좌측 패딩 추가
+            bubbleWrapper.appendChild(bubbleContent);
+
+            // 피드백이 아직 주어지지 않은 경우에만 피드백 버튼 표시
+            if (!feedbackGiven) {
+                const feedbackDiv = document.createElement('div');
+                feedbackDiv.className = 'chat-feedback';
+                
+                // 시간과 피드백 문구를 한 줄에, | 기호로 구분
+                const feedbackRow = document.createElement('span');
+                feedbackRow.style.display = 'flex';
+                feedbackRow.style.alignItems = 'center';
+                feedbackRow.style.gap = '8px';
+                const timeClone = timeEl.cloneNode(true);
+                const divider = document.createElement('span');
+                divider.textContent = '|';
+                divider.style.margin = '0 6px';
+                const feedbackText = document.createElement('span');
+                feedbackText.textContent = '이 답변이 도움이 되었나요?';
+                feedbackRow.appendChild(timeClone);
+                feedbackRow.appendChild(divider);
+                feedbackRow.appendChild(feedbackText);
+                feedbackDiv.appendChild(feedbackRow);
+                
+                // 좋아요/싫어요 버튼 생성
+                const likeBtn = document.createElement('button');
+                likeBtn.className = 'feedback-btn';
+                likeBtn.innerText = '👍';
+                const dislikeBtn = document.createElement('button');
+                dislikeBtn.className = 'feedback-btn';
+                dislikeBtn.innerText = '👎';
+                
+                // 피드백 버튼 클릭 이벤트 설정
+                likeBtn.onclick = () => sendFeedback(chatId, 1, likeBtn, dislikeBtn, feedbackDiv);
+                dislikeBtn.onclick = () => sendFeedback(chatId, -1, likeBtn, dislikeBtn, feedbackDiv);
+                feedbackDiv.appendChild(likeBtn);
+                feedbackDiv.appendChild(dislikeBtn);
+                bubbleWrapper.appendChild(feedbackDiv);
+            }
+            bubbleContainer.appendChild(bubbleWrapper);
+
+        } else { 
+            // 사용자 메시지 버블
+            bubbleContainer.appendChild(timeEl);
+            bubbleContainer.appendChild(bubbleDiv);
+        }
+        
+        // 채팅 영역에 버블 추가
+        chatArea.appendChild(bubbleContainer);
+        
+        // 스크롤을 완전히 맨 아래로 내리기 위해 requestAnimationFrame 두 번 사용
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+                chatArea.scrollTop = chatArea.scrollHeight;
+            });
+        });
+    }
+
+    // 피드백 전송 함수 (좋아요/싫어요)
+    async function sendFeedback(chatId, score, likeBtn, dislikeBtn, feedbackDiv) {
+        try {
+            // POST /feedback/feedback - 챗봇 응답에 대한 피드백 전송 API 호출
+            const payload = { chat_id: chatId, score: score };
+            const res = await fetch(`${API_BASE}/feedback/feedback`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+                credentials: 'include'
+            });
+            if (!res.ok) {
+                const errorText = await res.text();
+                alert('피드백 전송 실패: ' + errorText);
+                return;
+            }
+            // 피드백 성공 시 버튼과 문구 제거, 감사 팝업
+            if (feedbackDiv && feedbackDiv.parentNode) {
+                feedbackDiv.parentNode.removeChild(feedbackDiv);
+            }
+            alert('피드백 감사합니다!');
+        } catch (e) {
+            alert('피드백 전송 실패: ' + e.message);
+        }
+    }
+    </script>
+    </body>
+    </html>

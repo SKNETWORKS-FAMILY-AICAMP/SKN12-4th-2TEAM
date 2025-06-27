@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>이메일/비밀번호 찾기</title>
+    <link rel="stylesheet" href="/common/styles/reset.css">
+    <link rel="stylesheet" href="/common/styles/theme.css">
+    <style>
+        .center-box {
+            max-width: 500px;
+            margin: 120px auto;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+            padding: 40px 30px 30px 30px;
+            text-align: center;
+        }
+        .tab-btns {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 0;
+            border: none;
+            background: #eee;
+            color: #333;
+            font-size: 1.1em;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            margin-right: 2px;
+            transition: background 0.2s;
+        }
+        .tab-btn.active {
+            background: #6CA368;
+            color: #fff;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+    </style>
+</head>
+<body>
+    <div class="center-box">
+        <div class="tab-btns">
+            <button class="tab-btn active" id="tab-id-btn" onclick="showTab('id')">이메일 찾기</button>
+            <button class="tab-btn" id="tab-pw-btn" onclick="showTab('pw')">비밀번호 찾기</button>
+        </div>
+        <!-- 아이디 찾기 -->
+        <div class="tab-content active" id="tab-id">
+            <br><h2>이메일 찾기</h2><br>
+            <div id="findid-alert"></div>
+            <form id="findid-form">
+                <input type="text" class = "input" style="width: 200px;" id="findid-name" placeholder="이름" required><br><br>
+                <input type="text" class = "input" style="width: 200px;" id="findid-company" placeholder="회사명" required><br><br>
+                <button type="submit" class="button" style="font-size: 16px;">이메일 찾기</button>
+            </form>
+            <div id="findid-result"></div>
+        </div>
+        <!-- 비밀번호 찾기 -->
+        <div class="tab-content" id="tab-pw">
+            <br><h2>비밀번호 찾기</h2><br>
+            <div id="resetpw-alert"></div>
+            <form id="resetpw-form-step1" novalidate>
+                <input type="email" class = "input" id="resetpw-email" placeholder="이메일" required><br><br>
+                <button type="submit" class="button" style="font-size: 16px;">인증번호 전송</button>
+            </form>
+            <form id="resetpw-form-step2" style="display:none;">
+                <input type="text" class = "input" id="resetpw-code" placeholder="인증번호" maxlength="6" required><br><br>
+                <button type="submit" class="button" style="font-size: 16px;">인증번호 확인</button>
+            </form>
+            <form id="resetpw-form-step3" style="display:none;">
+                <input type="password" class = "input" id="resetpw-newpw" placeholder="새 비밀번호" required><br><br>
+                <input type="password" class = "input" id="resetpw-newpw2" placeholder="새 비밀번호 확인" required><br><br>
+                <button type="submit" class="button" style="font-size: 16px;">비밀번호 재설정</button>
+            </form>
+        </div>
+        <button class="link-btn" onclick="location.href='login.html'">로그인으로</button>
+    </div>
+    <script src="/common/utils/validation.js"></script>
+    <script>
+    // 탭 전환 함수 (아이디 찾기 ↔ 비밀번호 찾기)
+    function showTab(tab) {
+        document.getElementById('tab-id').classList.remove('active');
+        document.getElementById('tab-pw').classList.remove('active');
+        document.getElementById('tab-id-btn').classList.remove('active');
+        document.getElementById('tab-pw-btn').classList.remove('active');
+        if (tab === 'id') {
+            document.getElementById('tab-id').classList.add('active');
+            document.getElementById('tab-id-btn').classList.add('active');
+        } else {
+            document.getElementById('tab-pw').classList.add('active');
+            document.getElementById('tab-pw-btn').classList.add('active');
+        }
+    }
+
+    // API 기본 URL (상대 경로 사용 - Nginx 프록시를 통해 API 서버로 전달)
+    const API_BASE = '';
+    
+    // 아이디(이메일) 찾기 폼 제출 이벤트 핸들러
+    document.getElementById('findid-form').onsubmit = async function(e) {
+        e.preventDefault();
+        
+        // 폼 데이터 추출
+        const name = document.getElementById('findid-name').value;
+        const company_name = document.getElementById('findid-company').value;
+        const alertDiv = document.getElementById('findid-alert');
+        const resultDiv = document.getElementById('findid-result');
+        
+        // 이전 결과 초기화
+        alertDiv.innerHTML = '';
+        resultDiv.innerHTML = '';
+        
+        try {
+            // POST /auth/find-email - 이름과 회사명으로 이메일 찾기 API 호출
+            const res = await fetch(`${API_BASE}/auth/find-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, company_name })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                // 이메일 찾기 성공 시 결과 표시
+                resultDiv.innerHTML = `<br><div class="success">✅ 가입된 이메일: <b>${data.email}</b></div>`;
+            } else {
+                // 찾기 실패 시 에러 메시지 표시
+                let msg = data.detail;
+                if (msg && typeof msg === 'object') {
+                    msg = msg.message || JSON.stringify(msg);
+                }
+                alertDiv.innerHTML = `<div class="alert">⚠️ ${msg || '찾을 수 없습니다.'}</div>`;
+            }
+        } catch (err) {
+            // 네트워크 에러 등 예외 처리
+            alertDiv.innerHTML = `<div class="alert">⚠️ 에러: ${err}</div>`;
+        }
+    };
+
+    // 비밀번호 찾기 관련 변수들
+    let resetEmail = '';  // 비밀번호 재설정 대상 이메일
+    let resetCode = '';   // 인증 완료된 코드
+    
+    // 1단계: 인증번호 전송 폼 제출 이벤트 핸들러
+    document.getElementById('resetpw-form-step1').onsubmit = async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('resetpw-email').value;
+        const alertDiv = document.getElementById('resetpw-alert');
+        alertDiv.innerHTML = '';
+        
+        // 이메일 형식 검증 (정규식 사용)
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            alertDiv.innerHTML = '<div class="alert">⚠️ 유효한 이메일 주소를 입력해주세요.</div>';
+            return;
+        }
+        
+        try {
+            // POST /auth/request-password-reset - 비밀번호 재설정 인증번호 전송 API 호출
+            const res = await fetch(`${API_BASE}/auth/request-password-reset`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                // 인증번호 전송 성공 시 2단계로 진행
+                resetEmail = email;  // 이메일 저장
+                alertDiv.innerHTML = '<div class="info" style="font-size:14px;">✉️ 인증번호가 이메일로 전송되었습니다.<br>이메일이 오지 않으면 스팸함을 확인하거나 관리자에게 문의하세요.</div>';
+                document.getElementById('resetpw-form-step1').style.display = 'none';
+                document.getElementById('resetpw-form-step2').style.display = '';
+            } else {
+                // 전송 실패 시 에러 메시지 표시
+                let msg = data.detail;
+                if (msg && typeof msg === 'object') {
+                    msg = msg.message || JSON.stringify(msg);
+                }
+                alertDiv.innerHTML = `<div class="alert">⚠️ ${msg || '실패'}</div>`;
+            }
+        } catch (err) {
+            // 네트워크 에러 등 예외 처리
+            alertDiv.innerHTML = `<div class="alert">⚠️ 에러: ${err}</div>`;
+        }
+    };
+    
+    // 2단계: 인증번호 확인 폼 제출 이벤트 핸들러
+    document.getElementById('resetpw-form-step2').onsubmit = async function(e) {
+        e.preventDefault();
+        
+        const code = document.getElementById('resetpw-code').value;
+        const alertDiv = document.getElementById('resetpw-alert');
+        alertDiv.innerHTML = '';
+        
+        try {
+            // POST /auth/verify-password-reset-code - 비밀번호 재설정 인증번호 확인 API 호출
+            const res = await fetch(`${API_BASE}/auth/verify-password-reset-code`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: resetEmail, code })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                // 인증 성공 시 3단계로 진행
+                resetCode = code;  // 인증 코드 저장
+                alertDiv.innerHTML = '<div class="success">✅ 인증 성공! 새 비밀번호를 입력하세요.</div>';
+                document.getElementById('resetpw-form-step2').style.display = 'none';
+                document.getElementById('resetpw-form-step3').style.display = '';
+            } else {
+                // 인증 실패 시 에러 메시지 표시
+                let msg = data.detail;
+                if (msg && typeof msg === 'object') {
+                    msg = msg.message || JSON.stringify(msg);
+                }
+                alertDiv.innerHTML = `<div class="alert">⚠️ ${msg || '실패'}</div>`;
+            }
+        } catch (err) {
+            // 네트워크 에러 등 예외 처리
+            alertDiv.innerHTML = `<div class="alert">⚠️ 에러: ${err}</div>`;
+        }
+    };
+    
+    // 3단계: 비밀번호 재설정 폼 제출 이벤트 핸들러
+    document.getElementById('resetpw-form-step3').onsubmit = async function(e) {
+        e.preventDefault();
+        
+        const newpw = document.getElementById('resetpw-newpw').value;
+        const newpw2 = document.getElementById('resetpw-newpw2').value;
+        const alertDiv = document.getElementById('resetpw-alert');
+        alertDiv.innerHTML = '';
+        
+        // 새 비밀번호 일치 확인
+        if (newpw !== newpw2) {
+            alertDiv.innerHTML = '<div class="alert">⚠️ 비밀번호가 일치하지 않습니다.</div>';
+            return;
+        }
+        
+        try {
+            // POST /auth/reset-password - 비밀번호 재설정 API 호출
+            const res = await fetch(`${API_BASE}/auth/reset-password`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: resetEmail, code: resetCode, new_password: newpw })
+            });
+            
+            const data = await res.json();
+            
+            if (res.ok) {
+                // 비밀번호 재설정 성공 시 로그인 페이지로 이동
+                alertDiv.innerHTML = '<div class="success">✅ 비밀번호가 재설정되었습니다! 로그인 해주세요.</div>';
+                setTimeout(() => {
+                    location.href = 'login.html';  // 2초 후 로그인 페이지로 이동
+                }, 2000);
+            } else {
+                // 재설정 실패 시 에러 메시지 표시
+                let msg = data.detail;
+                if (msg && typeof msg === 'object') {
+                    msg = msg.message || JSON.stringify(msg);
+                }
+                alertDiv.innerHTML = `<div class="alert">⚠️ ${msg || '실패'}</div>`;
+            }
+        } catch (err) {
+            // 네트워크 에러 등 예외 처리
+            alertDiv.innerHTML = `<div class="alert">⚠️ 에러: ${err}</div>`;
+        }
+    };
+    </script>
+</body>
+</html> 
